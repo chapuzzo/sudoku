@@ -4,18 +4,24 @@
 
   var sudokuCell = React.createClass({
     getInitialState: function(){
+      var sudoku = this.props.sudoku
+      var coords = this.props
       return {
         status: null,
-        value: ''
+        value: sudoku.output(coords),
+        locked: !!sudoku.output(coords)
       }
+    },
+    setValue: function(value, callback){
+      this.setState({value: value}, callback)
     },
     handleChange: function(event){
       console.log(this.props)
       var sudoku = this.props.sudoku
       var coords = this.props
-      sudoku.input(coords, event.target.value, this.markAs, this.setState.bind(this, {value: event.target.value}))
+      sudoku.input(coords, event.target.value, this.markAs, this.setValue)
     },
-    markAs: function(type){
+    markAs: function(type, callback){
       var typesMap = {
         blank: '',
         correct: 'valid',
@@ -27,11 +33,11 @@
         return
       }
 
-      this.setState({status: typesMap[type]})
+      this.setState({status: typesMap[type]}, callback)
     },
     render: function(){
       var containerDiv = React.createElement('div', {className: ['cell', this.state.status].join(' ')},
-        React.createElement('input', {maxLength: 1, onChange: this.handleChange, value: this.state.value})
+        React.createElement('input', {maxLength: 1, onChange: this.handleChange, value: this.state.value, disabled: this.state.locked})
       )
       return containerDiv
     }
