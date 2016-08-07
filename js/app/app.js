@@ -16,7 +16,6 @@
       this.setState({value: value}, callback)
     },
     handleChange: function(event){
-      console.log(this.props)
       var sudoku = this.props.sudoku
       var coords = this.props
       sudoku.input(coords, event.target.value, this.markAs, this.setValue)
@@ -37,7 +36,14 @@
     },
     render: function(){
       var containerDiv = React.createElement('div', {className: ['cell', this.state.status].join(' ')},
-        React.createElement('input', {maxLength: 1, onChange: this.handleChange, value: this.state.value, disabled: this.state.locked})
+        React.createElement('input', {
+          // type: 'number',
+          // inputMode: 'mumeric',
+          maxLength: 1,
+          onChange: this.handleChange,
+          value: this.state.value,
+          disabled: this.state.locked
+        })
       )
       return containerDiv
     }
