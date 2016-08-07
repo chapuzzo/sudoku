@@ -1,87 +1,113 @@
 'use strict';
-(function(){
-  var container = document.getElementById('sudoku')
-  var sudokuChecker = SudokuChecker(3)
 
-  var sudokuCell = React.createClass({
-    getInitialState: function(){
-      return {
-        status: null,
-        value: ''
+function Sudoku(size){
+  var board = []
+
+  for (var w=0; w < size; w++){
+    board.push([])
+    for (var x=0; x < size; x++){
+      board[w].push([])
+      for (var y=0; y < size; y++){
+        board[w][x].push([])
+        for (var z=0; z < size; z++){
+          board[w][x][y][z] = null;
+        }
       }
-    },
-    handleChange: function(event){
-      sudokuChecker.input(this.props, event.target.value, this.markAs, this.setState.bind(this, {value: event.target.value}))
-    },
-    markAs: function(type){
-      var typesMap = {
-        blank: '',
-        correct: 'valid',
-        wrong: 'invalid'
-      }
-
-      if (!Object.keys(typesMap).includes(type)){
-        console.error('invalid type specified')
-        return
-      }
-
-      this.setState({status: typesMap[type]})
-    },
-    render: function(){
-      var containerDiv = React.createElement('div', {className: ['cell', this.state.status].join(' ')},
-        React.createElement('input', {maxLength: 1, onChange: this.handleChange, value: this.state.value})
-      )
-      return containerDiv
     }
-  })
+  }
 
-  var sudokuSquareRow = React.createClass({
-    render: function(){
-      var containerDiv = React.createElement('div', {className: 'squareRow'},
-        React.createElement(sudokuCell, Object.assign({}, this.props, {col: 0})),
-        React.createElement(sudokuCell, Object.assign({}, this.props, {col: 1})),
-        React.createElement(sudokuCell, Object.assign({}, this.props, {col: 2}))
+  var _checkCell = function(coords){
+    var value = board[coords.squareRow][coords.squareCol][coords.row][coords.col]
+
+    return value === '' || (value > 0) && (value <= Math.pow(size, 2))
+  }
+
+  var _checkSquare = function(coords){
+    var square = board[coords.squareRow][coords.squareCol]
+    var resultingArray = square.reduce(function(prev, curr){
+      return prev.concat(curr)
+    }, [])
+
+    return resultingArray
+      .filter(
+        (x) => x != null && x != ''
       )
-      return containerDiv
-    }
-  })
-
-  var sudokuSquare = React.createClass({
-    render: function(){
-      var containerDiv = React.createElement('div', {className: 'square'},
-        React.createElement(sudokuSquareRow, Object.assign({}, this.props, {row: 0})),
-        React.createElement(sudokuSquareRow, Object.assign({}, this.props, {row: 1})),
-        React.createElement(sudokuSquareRow, Object.assign({}, this.props, {row: 2}))
+      .every(
+        (x, _, array) =>
+          array.filter(
+            (y) => x == y
+          ).length < 2
       )
-      return containerDiv
-    }
-  })
+  }
 
-  var sudokuRow = React.createClass({
-    render: function(){
-      var containerDiv = React.createElement('div', {className: 'row'},
-        React.createElement(sudokuSquare, Object.assign({}, this.props, {squareCol: 0})),
-        React.createElement(sudokuSquare, Object.assign({}, this.props, {squareCol: 1})),
-        React.createElement(sudokuSquare, Object.assign({}, this.props, {squareCol: 2}))
+  var _checkRow = function(coords){
+    var squareRow = board[coords.squareRow]
+
+    var resultingArray = squareRow.reduce(function(prev, curr){
+      return prev.concat(curr[coords.row])
+    }, [])
+
+    return resultingArray
+      .filter(
+        (x) => x != null && x != ''
       )
-      return containerDiv
-    }
-  })
-
-  var sudokuBoard = React.createClass({
-    render: function(){
-      var containerDiv = React.createElement('div', {className: 'board'},
-        React.createElement(sudokuRow, {squareRow: 0}),
-        React.createElement(sudokuRow, {squareRow: 1}),
-        React.createElement(sudokuRow, {squareRow: 2})
+      .every(
+        (x, _, array) =>
+          array.filter(
+            (y) => x == y
+          ).length < 2
       )
-      return containerDiv
+  }
+
+  var _checkCol = function(coords){
+    var resultingArray = board.reduce(function(prev, curr){
+      return prev.concat(curr[coords.squareCol])
+    }, []).reduce(function(prev, curr){
+      return prev.concat(curr[coords.col])
+    }, [])
+
+    return resultingArray
+      .filter(
+        (x) => x != null && x != ''
+      )
+      .every(
+        (x, _, array) =>
+          array.filter(
+            (y) => x == y
+          ).length < 2
+      )
+  }
+
+
+  var _input = function(coords, value, statusCallback, valueCallback){
+    board[coords.squareRow][coords.squareCol][coords.row][coords.col] = value
+
+    if (_checkCell(coords))
+      valueCallback()
+
+    if (value.length == 0){
+      statusCallback('blank')
+      return
     }
-  })
 
-  window.renderedboard = ReactDOM.render(
-    React.createElement(sudokuBoard),
-    container
-  )
+    var resultMap = {
+      true: 'correct',
+      false: 'wrong'
+    }
 
-}())
+    statusCallback(resultMap[ _checkSquare(coords) && _checkRow(coords) && _checkCol(coords)])
+  }
+
+  var _output = function(coords){
+    return board[coords.squareRow][coords.squareCol][coords.row][coords.col]
+  }
+
+  var _log = function(){
+    console.log(board)
+  }
+
+  return {
+    input: _input,
+    output: _output
+  }
+}
