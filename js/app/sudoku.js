@@ -17,13 +17,21 @@ function Sudoku(size){
       }
     }
 
-    _seed(20)
+    _seed(60)
+  }
+
+  var _occupaton = function(){
+    return _.filter(_.flattenDeep(board), _removeNullOrEmpty).length
   }
 
   var _seed = function(amount){
     var maxValue = Math.pow(size, 2)
+    var i = 0
 
-    for (var i = 0; i <= amount; i++){
+    // for (var i = 0; i <= amount; i++){
+    while (_occupaton() < amount){
+      console.log('seed')
+      i++
 
       var desiredValue = (i % maxValue) + 1
 
