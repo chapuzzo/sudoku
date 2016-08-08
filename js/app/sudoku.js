@@ -17,11 +17,15 @@ function Sudoku(size){
       }
     }
 
-    _seed()
+    _seed(20)
   }
 
-  var _seed = function(){
-    for (var i = 1; i <= Math.pow(size, 2); i++){
+  var _seed = function(amount){
+    var maxValue = Math.pow(size, 2)
+
+    for (var i = 0; i <= amount; i++){
+
+      var desiredValue = (i % maxValue) + 1
 
       var squareRow = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
       var squareCol = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
@@ -35,8 +39,8 @@ function Sudoku(size){
         col: col
       }
 
-      if (validGuess(coords, i))
-        _input(coords, i, _noop, _noop)
+      if (validGuess(coords, desiredValue))
+        _input(coords, desiredValue, _noop, _noop)
     }
   }
 
