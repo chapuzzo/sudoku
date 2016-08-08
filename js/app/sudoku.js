@@ -22,6 +22,7 @@ function Sudoku(size){
 
   var _seed = function(){
     for (var i = 1; i <= Math.pow(size, 2); i++){
+
       var squareRow = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
       var squareCol = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
       var row = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
@@ -35,7 +36,7 @@ function Sudoku(size){
       }
 
       if (validGuess(coords, i))
-        _input(coords, i, function(){}, function(){})
+        _input(coords, i, _noop, _noop)
     }
   }
 
@@ -46,19 +47,10 @@ function Sudoku(size){
   var _removeNullOrEmpty = (x) => !(x == null || x == '')
 
   var _hasNoDuplicate = function(who){
-    // return (x, _, array) =>
-    //   array.filter(
-    //     (y) => x == y
-    //   ).length < 2
-
-    // return (x) => x != who
-    return function(x){
-      // console.log(arguments)
-      console.log(x + ' vs. ' + who)
-      return who != x
-    }
+    return (x) => who != x
   }
 
+  var _noop = () => {}
 
   var _checkSquare = function(coords, value){
     var square = board[coords.squareRow][coords.squareCol]
@@ -126,12 +118,12 @@ function Sudoku(size){
     }
 
     if (value.length == 0)
-      statusCallback('blank', function(){ _log() })
+      statusCallback('blank', _noop)
     else
-      statusCallback(resultMap[ validGuess(coords, value) ], function(){ console.log('length > 0, guess: ' + validGuess); _log() })
+      statusCallback(resultMap[ validGuess(coords, value) ], _noop)
 
     board[coords.squareRow][coords.squareCol][coords.row][coords.col] = value
-    valueCallback(value, function(){ console.log('valid cell') })
+    valueCallback(value, _noop)
   }
 
   var _output = function(coords){
