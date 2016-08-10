@@ -1,55 +1,59 @@
 'use strict';
 
-function Sudoku(size){
+function Sudoku(size, callback){
   var board = []
 
-  var _init = function(){
-    for (var w=0; w < size; w++){
-      board.push([])
-      for (var x=0; x < size; x++){
-        board[w].push([])
-        for (var y=0; y < size; y++){
-          board[w][x].push([])
-          for (var z=0; z < size; z++){
-            board[w][x][y][z] = '';
-          }
-        }
-      }
-    }
+  var _noop = () => {}
 
-    _seed(60)
+  var _position = () => _.random(size - 1)
+
+  var _init = function(){
+    _.times(size, (squareRow) => {
+      board.push([])
+      _.times(size, (squareCol) => {
+        board[squareRow].push([])
+        _.times(size, (row) => {
+          board[squareRow][squareCol].push([])
+          _.times(size, (col) => {
+            board[squareRow][squareCol][row][col] = '';
+          })
+        })
+      })
+    })
   }
 
-  var _occupaton = function(){
+  var _occupation = function(){
     return _.filter(_.flattenDeep(board), _removeNullOrEmpty).length
   }
 
-  var _seed = function(amount){
+  var _seed = function(callback){
     var maxValue = Math.pow(size, 2)
-    var i = 0
 
-    // for (var i = 0; i <= amount; i++){
-    while (_occupaton() < amount){
-      console.log('seed')
-      i++
+    _.times(size, function(squareRow){
+      _.times(size, function(row){
+        _.times(size, function(squareCol){
+          _.times(size, function(col){
 
-      var desiredValue = (i % maxValue) + 1
+              var coords = {
+                squareRow: squareRow,
+                squareCol: squareCol,
+                row: row,
+                col: col
+              }
 
-      var squareRow = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
-      var squareCol = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
-      var row = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
-      var col = (Math.random() * Math.pow(size - 1, 1)).toFixed(0)
+              var i_x_n = squareRow * size + col
+              var i_d_n = squareRow
+              var j = squareCol * size + row
+              var n_n = maxValue
 
-      var coords = {
-        squareRow: squareRow,
-        squareCol: squareCol,
-        row: row,
-        col: col
-      }
+              var value = (i_x_n + i_d_n + j) % n_n + 1
+              _input(coords, value, _noop, _noop)
+          })
+        })
+      })
+    })
 
-      if (validGuess(coords, desiredValue))
-        _input(coords, desiredValue, _noop, _noop)
-    }
+    callback()
   }
 
   var _checkCell = function(coords, value){
@@ -61,8 +65,6 @@ function Sudoku(size){
   var _hasNoDuplicate = function(who){
     return (x) => who != x
   }
-
-  var _noop = () => {}
 
   var _checkSquare = function(coords, value){
     var square = board[coords.squareRow][coords.squareCol]
@@ -120,7 +122,6 @@ function Sudoku(size){
   }
 
   var _input = function(coords, value, statusCallback, valueCallback){
-
     if (!_checkCell(coords, value))
       return
 
@@ -146,6 +147,8 @@ function Sudoku(size){
 
   return {
     input: _input,
-    output: _output
+    output: _output,
+    size: size,
+    seed: _seed
   }
 }

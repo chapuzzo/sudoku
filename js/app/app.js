@@ -5,7 +5,7 @@
   var sudokuCell = React.createClass({
     getInitialState: function(){
       var sudoku = this.props.sudoku
-      var coords = this.props
+      var coords = _.omit(this.props, 'sudoku')
       return {
         status: null,
         value: sudoku.output(coords),
@@ -17,7 +17,7 @@
     },
     handleChange: function(event){
       var sudoku = this.props.sudoku
-      var coords = this.props
+      var coords = _.omit(this.props, 'sudoku')
       sudoku.input(coords, event.target.value, this.markAs, this.setValue)
     },
     markAs: function(type, callback){
@@ -94,9 +94,12 @@
   })
 
   var sudoku = Sudoku(3)
-  window.renderedboard = ReactDOM.render(
-    React.createElement(sudokuBoard, {sudoku: sudoku}),
-    container
-  )
+
+  sudoku.seed(function(){
+    window.renderedboard = ReactDOM.render(
+      React.createElement(sudokuBoard, {sudoku: sudoku}),
+      container
+    )
+  })
 
 }())
