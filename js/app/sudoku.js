@@ -7,6 +7,15 @@ function Sudoku(size, callback){
 
   var _position = () => _.random(size - 1)
 
+  var _removeNullOrEmpty = (x) => !(x == null || x == '')
+
+  var _hasNoDuplicate = (who) =>
+    (x) => who != x
+
+  var _occupation = () => _.filter(_.flattenDeep(board), _removeNullOrEmpty).length
+
+  var _log = () => console.log(board)
+
   var _init = function(){
     _.times(size, (squareRow) => {
       board.push([])
@@ -20,10 +29,6 @@ function Sudoku(size, callback){
         })
       })
     })
-  }
-
-  var _occupation = function(){
-    return _.filter(_.flattenDeep(board), _removeNullOrEmpty).length
   }
 
   var _seed = function(callback){
@@ -41,13 +46,12 @@ function Sudoku(size, callback){
                 col: col
               }
 
-              var i_x_n = squareRow * size + col
-              var i_d_n = squareRow
-              var j = squareCol * size + row
-              var n_n = maxValue
+              var y = squareRow * size + row
+              var x = squareCol * size + col
+              var value = (y * size + squareRow + x) % maxValue + 1
 
-              var value = (i_x_n + i_d_n + j) % n_n + 1
-              _input(coords, value, _noop, _noop)
+              if (validGuess(coords, value))
+                _input(coords, value, _noop, _noop)
           })
         })
       })
@@ -60,61 +64,49 @@ function Sudoku(size, callback){
     return value === '' || (value > 0) && (value <= Math.pow(size, 2))
   }
 
-  var _removeNullOrEmpty = (x) => !(x == null || x == '')
+  var _checkValid = (array, value) => {
 
-  var _hasNoDuplicate = function(who){
-    return (x) => who != x
+    var result = array
+      .filter(
+        _removeNullOrEmpty
+      )
+      .every(
+        _hasNoDuplicate(value)
+      )
+
+      if (!result)
+        console.log(array, value)
+
+      return result
   }
 
   var _checkSquare = function(coords, value){
-    var square = board[coords.squareRow][coords.squareCol]
-    var resultingArray = square.reduce(function(prev, curr){
+    var squareCells = board[coords.squareRow][coords.squareCol]
+    var square = squareCells.reduce(function(prev, curr){
       return prev.concat(curr)
     }, [])
 
-    return resultingArray
-      .filter(
-        _removeNullOrEmpty
-      )
-      .every(
-        _hasNoDuplicate(value)
-      )
+    return _checkValid(square, value)
   }
 
   var _checkRow = function(coords, value){
-    var squareRow = board[coords.squareRow]
+    var rowCells = board[coords.squareRow]
 
-    var resultingArray = squareRow.reduce(function(prev, curr){
+    var row = rowCells.reduce(function(prev, curr){
       return prev.concat(curr[coords.row])
     }, [])
 
-    return resultingArray
-      .filter(
-        _removeNullOrEmpty
-      )
-      .every(
-        _hasNoDuplicate(value)
-      )
+    return _checkValid(row, value)
   }
 
   var _checkCol = function(coords, value){
-    var resultingArray = board.reduce(function(prev, curr){
+    var col = board.reduce(function(prev, curr){
       return prev.concat(curr[coords.squareCol])
     }, []).reduce(function(prev, curr){
       return prev.concat(curr[coords.col])
     }, [])
 
-    return resultingArray
-      .filter(
-        _removeNullOrEmpty
-      )
-      .every(
-        _hasNoDuplicate(value)
-      )
-  }
-
-  var _log = function(){
-    console.log(board)
+    return _checkValid(col, value)
   }
 
   var validGuess = function(coords, value){
