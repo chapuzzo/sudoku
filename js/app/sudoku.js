@@ -50,14 +50,35 @@ function Sudoku(size, callback){
               var x = squareCol * size + col
               var value = (y * size + squareRow + x) % maxValue + 1
 
-              if (validGuess(coords, value))
+              if (_validGuess(coords, value))
                 _input(coords, value, _noop, _noop)
           })
         })
       })
     })
 
+    if (_.random())
+      _verticalSwap()
+
     callback()
+  }
+
+  var _swapCols = (board, firstSquareCol, firstCol, secondSquareCol, secondCol) => {
+
+    _.times(size, function(squareRow){
+      _.times(size, function(row){
+        var tmp = board[squareRow][firstSquareCol][row][firstCol]
+        board[squareRow][firstSquareCol][row][firstCol] = board[squareRow][secondSquareCol][row][secondCol]
+        board[squareRow][secondSquareCol][row][secondCol] = tmp
+      })
+    })
+  }
+
+  var _verticalSwap = (board)=>{
+    _swapCols(board, 0, 0, 2, 2)
+    _swapCols(board, 0, 1, 2, 1)
+    _swapCols(board, 0, 2, 2, 0)
+    _swapCols(board, 1, 0, 1, 2)
   }
 
   var _checkCell = function(coords, value){
@@ -109,7 +130,7 @@ function Sudoku(size, callback){
     return _checkValid(col, value)
   }
 
-  var validGuess = function(coords, value){
+  var _validGuess = function(coords, value){
     return _checkSquare(coords, value) && _checkRow(coords, value) && _checkCol(coords, value)
   }
 
@@ -125,7 +146,7 @@ function Sudoku(size, callback){
     if (value.length == 0)
       statusCallback('blank', _noop)
     else
-      statusCallback(resultMap[ validGuess(coords, value) ], _noop)
+      statusCallback(resultMap[ _validGuess(coords, value) ], _noop)
 
     board[coords.squareRow][coords.squareCol][coords.row][coords.col] = value
     valueCallback(value, _noop)
