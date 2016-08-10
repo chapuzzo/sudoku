@@ -39,7 +39,7 @@
     render: function(){
       var containerDiv = React.createElement('div', {className: ['cell', this.state.status].join(' ')},
         React.createElement('input', {
-          type: 'tel',
+          type: 'number',
           // inputMode: 'mumeric',
           maxLength: 1,
           onChange: this.handleChange,
