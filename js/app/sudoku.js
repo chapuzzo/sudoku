@@ -58,7 +58,7 @@ function Sudoku(size, callback){
     })
 
     if (_.random())
-      _verticalSwap()
+      _verticalSwap(board)
 
     callback()
   }
