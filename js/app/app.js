@@ -2,6 +2,8 @@
 (function(){
   var container = document.getElementById('sudoku')
 
+  var controls = document.getElementById('controls')
+
   var sudokuCell = React.createClass({
     getInitialState: function(){
       var sudoku = this.props.sudoku
@@ -94,12 +96,41 @@
   })
 
   var sudoku = Sudoku(3)
+  var defaultDifficulty = 30
 
-  sudoku.seed(function(){
-    window.renderedboard = ReactDOM.render(
-      React.createElement(sudokuBoard, {sudoku: sudoku}),
-      container
-    )
+  var _createBoard = function(difficulty){
+    ReactDOM.unmountComponentAtNode(container)
+    sudoku.seed(difficulty, function(){
+      ReactDOM.render(
+        React.createElement(sudokuBoard, {sudoku: sudoku}),
+        container
+      )
+    })
+  }
+
+  _createBoard(defaultDifficulty)
+
+  var slider = React.createClass({
+    changeFn: _.debounce(function(difficulty){
+      _createBoard(difficulty)
+    }, 500),
+    onChange: function(event){
+      this.changeFn(event.target.value)
+    },
+    render: function(){
+      return React.DOM.input({
+        defaultValue: defaultDifficulty,
+        type: 'range',
+        onChange: this.onChange,
+        min: 9,
+        max: 72
+      })
+    }
   })
+
+  ReactDOM.render(
+    React.createElement(slider),
+    controls
+  )
 
 }())

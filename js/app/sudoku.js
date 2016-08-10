@@ -3,6 +3,10 @@
 function Sudoku(size, callback){
   var board = []
 
+  var maxValue = Math.pow(size, 2)
+
+  var boardCells = Math.pow(size, 4)
+
   var _noop = () => {}
 
   var _position = () => _.random(size - 1)
@@ -16,7 +20,8 @@ function Sudoku(size, callback){
 
   var _log = () => console.log(board)
 
-  var _init = function(){
+  var _createBoard = function(){
+    board = []
     _.times(size, (squareRow) => {
       board.push([])
       _.times(size, (squareCol) => {
@@ -31,8 +36,9 @@ function Sudoku(size, callback){
     })
   }
 
-  var _seed = function(callback){
-    var maxValue = Math.pow(size, 2)
+  var _seed = function(hollows, callback){
+
+    _createBoard()
 
     _.times(size, function(squareRow){
       _.times(size, function(row){
@@ -60,11 +66,24 @@ function Sudoku(size, callback){
     if (_.random())
       _verticalSwap(board)
 
+    if (_.random())
+      _horizontalSwap(board)
+
+    while (_occupation() > (boardCells - hollows)) {
+      var coords = {
+        squareRow: _position(),
+        squareCol: _position(),
+        row: _position(),
+        col: _position()
+      }
+
+      _input(coords, '', _noop, _noop)
+    }
+
     callback()
   }
 
   var _swapCols = (board, firstSquareCol, firstCol, secondSquareCol, secondCol) => {
-
     _.times(size, function(squareRow){
       _.times(size, function(row){
         var tmp = board[squareRow][firstSquareCol][row][firstCol]
@@ -74,11 +93,28 @@ function Sudoku(size, callback){
     })
   }
 
-  var _verticalSwap = (board)=>{
+  var _verticalSwap = (board) => {
     _swapCols(board, 0, 0, 2, 2)
     _swapCols(board, 0, 1, 2, 1)
     _swapCols(board, 0, 2, 2, 0)
     _swapCols(board, 1, 0, 1, 2)
+  }
+
+  var _swapRows = (board, firstSquareRow, firstRow, secondSquareRow, secondRow) => {
+    _.times(size, function(squareCol){
+      _.times(size, function(col){
+        var tmp = board[firstSquareRow][squareCol][firstRow][col]
+        board[firstSquareRow][squareCol][firstRow][col] = board[secondSquareRow][squareCol][secondRow][col]
+        board[secondSquareRow][squareCol][secondRow][col] = tmp
+      })
+    })
+  }
+
+  var _horizontalSwap = (board) => {
+    _swapRows(board, 0, 0, 2, 2)
+    _swapRows(board, 0, 1, 2, 1)
+    _swapRows(board, 0, 2, 2, 0)
+    _swapRows(board, 1, 0, 1, 2)
   }
 
   var _checkCell = function(coords, value){
@@ -95,8 +131,8 @@ function Sudoku(size, callback){
         _hasNoDuplicate(value)
       )
 
-      if (!result)
-        console.log(array, value)
+      // if (!result)
+      //   console.log(array, value)
 
       return result
   }
@@ -155,8 +191,6 @@ function Sudoku(size, callback){
   var _output = function(coords){
     return board[coords.squareRow][coords.squareCol][coords.row][coords.col]
   }
-
-  _init()
 
   return {
     input: _input,
